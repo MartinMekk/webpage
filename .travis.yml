@@ -36,4 +36,4 @@ deploy:
   bucket: elm-oslo-webpage-test
   local-dir: site
   skip_cleanup: true
-  region: "EU (Frankfurt)"
+  region: eu-central-1
