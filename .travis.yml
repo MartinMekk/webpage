@@ -7,4 +7,6 @@ cache:
     - elm-stuff/packages
 
 install:
-  - sh build_elm.sh
+  - npm install --global elm-package
+  - elm-package install --yes
+  - elm-make elm/Main.elm --output site/elm.js
