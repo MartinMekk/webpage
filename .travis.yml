@@ -8,6 +8,19 @@ cache:
   directories:
     - elm-stuff/build-artifacts
     - elm-stuff/packages
+    - sysconfcpus
+    - $HOME/.npm # https://stackoverflow.com/a/42523517/1148249
+
+before_install:
+  - | # build time improvement see: https://git.io/vQcqz
+    if [ ! -d sysconfcpus/bin ];
+    then
+      git clone https://github.com/obmarg/libsysconfcpus.git;
+      cd libsysconfcpus;
+      ./configure --prefix=$TRAVIS_BUILD_DIR/sysconfcpus;
+      make && make install;
+      cd ..;
+    fi
 
 install:
   - npm install -g elm@$ELM_VERSION
