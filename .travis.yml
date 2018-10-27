@@ -1,0 +1,10 @@
+language: node_js
+node_js: node
+
+cache:
+  directories:
+    - elm-stuff/build-artifacts
+    - elm-stuff/packages
+
+install:
+  - sh build_elm.sh
