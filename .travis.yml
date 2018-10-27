@@ -1,34 +1,40 @@
 language: node_js
 node_js: node
-
 env:
-  - ELM_VERSION=0.18.0 ELM_TEST=0.18.12
-
+- ELM_VERSION=0.18.0 ELM_TEST=0.18.12
 cache:
   directories:
-    - elm-stuff/build-artifacts
-    - elm-stuff/packages
-    - sysconfcpus
-    - $HOME/.npm # https://stackoverflow.com/a/42523517/1148249
-
+  - elm-stuff/build-artifacts
+  - elm-stuff/packages
+  - sysconfcpus
+  - "$HOME/.npm"
 before_install:
-  - | # build time improvement see: https://git.io/vQcqz
-    if [ ! -d sysconfcpus/bin ];
-    then
-      git clone https://github.com/obmarg/libsysconfcpus.git;
-      cd libsysconfcpus;
-      ./configure --prefix=$TRAVIS_BUILD_DIR/sysconfcpus;
-      make && make install;
-      cd ..;
-    fi
-
+- |
+  if [ ! -d sysconfcpus/bin ];
+  then
+    git clone https://github.com/obmarg/libsysconfcpus.git;
+    cd libsysconfcpus;
+    ./configure --prefix=$TRAVIS_BUILD_DIR/sysconfcpus;
+    make && make install;
+    cd ..;
+  fi
 install:
-  - npm install -g elm@$ELM_VERSION elm-test@$ELM_TEST
-  # the next 3 lines are courtesy of @rtfeldman https://git.io/vbj0j
-  - mv $(npm config get prefix)/bin/elm-make $(npm config get prefix)/bin/elm-make-old
-  - printf "#\041/bin/bash\n\necho \"Running elm-make with sysconfcpus -n 2\"\n\n$TRAVIS_BUILD_DIR/sysconfcpus/bin/sysconfcpus -n 2 elm-make-old \"\$@\"" > $(npm config get prefix)/bin/elm-make
-  - chmod +x $(npm config get prefix)/bin/elm-make
-  - travis_retry elm-package install --yes
-
+- npm install -g elm@$ELM_VERSION elm-test@$ELM_TEST
+- mv $(npm config get prefix)/bin/elm-make $(npm config get prefix)/bin/elm-make-old
+- printf "#\041/bin/bash\n\necho \"Running elm-make with sysconfcpus -n 2\"\n\n$TRAVIS_BUILD_DIR/sysconfcpus/bin/sysconfcpus
+  -n 2 elm-make-old \"\$@\"" > $(npm config get prefix)/bin/elm-make
+- chmod +x $(npm config get prefix)/bin/elm-make
+- travis_retry elm-package install --yes
+- travis_retry elm-make elm/Main.elm --output site/elm.js
 script:
-  - echo "skipping tests, yolo 😎"
+- "echo \"skipping tests, yolo \U0001F60E\""
+deploy:
+  provider: s3
+  access_key_id: AKIAIZTKQXWBZTY4L47A
+  secret_access_key:
+    secure: pglLGbW+SJi2YkqjIuSeBZ22P5815aIqyoqO7gxjYjIO+zZ7hRiXRhcp8afGNuaM1y46AT3sbqRHSTvvlt49njEU1I9Ilv0HWNOVZEIw/vpPUXz0/vdLD9UtdGrfUihBwZ+af3ybLdU1DnpbmZAtP61BFHDi8V9KYWG9tfgZcKRz9U9PpqR4jiO0tr9tCY+zMG8bx9DzhBAI+WkOS5/3pQBcE90y8E0DCeqM8+jpCHw3ep1am02fbmF8EPCozG5fVICxlbQJSaiG0z2HeJHcI5Oo3ulWscgKqOCZT5sEVqhuXj/ZkkS4BYOK134HVCVieK3TZ/S/VJhQ8ciS9gQKYbjfUcBL/PdnVybIcg00lRaFFKhhdK8N/zMcj1ncyLLAVpWQdgsxr374dKDz3DyY+2jp9oLRID0Oy60dtr/3MxFR9purV0NMDZ3FXUGDBondFRS3xGV9ezLY/SZn0/lL5dE74kuoww/h1nXf5r6YJObp4DBNbW+9Be9KzTQOmmyLiNHvXOJputgi115h4FZBK/wkYkL8VCeesTvlE5o4IRpXFKh7uzhtcEIY8Yg1DnQxqmq94z5vgLa/xx51SbNLMsav7cyWdNsePCI6Ox0+Lm3taKu4sVHDJwM0NI9GNMQj1gBu2sYOocpuWqtSkFkhh7/9A2KfWAk9CqLgBaxknP4=
+  bucket: elm-oslo-webpage-test
+  local-dir: site
+  acl: ''
+  on:
+    repo: MartinMekk/webpage
